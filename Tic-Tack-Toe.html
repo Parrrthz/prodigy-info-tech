@@ -1,0 +1,265 @@
+<!-- To build a tic-tac-toe web application, you can use HTML, CSS, and JavaScript. By implementing functions to handle user clicks, track game state, and check for winning conditions, you can create an interactive and engaging tic-tac-toe game. With these technologies and functionalities, users can play against each other or against an AI opponent, aiming to get three markers in a row to win the game. -->
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="./Tick.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="status">
+            <span id="message">Player X's turn</span>
+        </div>
+        <div class="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button id="reset">Reset Game</button>
+    </div>
+    <script src="./Tick.js"></script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .game-container {
+            text-align: center;
+        }
+        .status {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 0 auto;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            background-color: white;
+            border: 1px solid #ddd;
+        }
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+        button {
+            font-size: 1.2em;
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .player-names {
+            margin-bottom: 20px;
+        }
+        .stats {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="player-names">
+            <input type="text" id="playerX" placeholder="Enter Player X's name">
+            <input type="text" id="playerO" placeholder="Enter Player O's name">
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+            </select>
+            <button id="startGame">Start Game</button>
+        </div>
+        <div class="status" id="status">Enter player names and start the game</div>
+        <div class="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button id="reset">Reset Game</button>
+        <div class="stats">
+            <h2>Game Statistics</h2>
+            <p id="wins">X Wins: 0</p>
+            <p id="ties">Ties: 0</p>
+            <p id="losses">O Wins: 0</p>
+        </div>
+    </div>
+
+    <script>
+        const cells = Array.from(document.querySelectorAll('.cell'));
+        const status = document.getElementById('status');
+        const resetButton = document.getElementById('reset');
+        const startGameButton = document.getElementById('startGame');
+        const playerXInput = document.getElementById('playerX');
+        const playerOInput = document.getElementById('playerO');
+        const difficultySelect = document.getElementById('difficulty');
+
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = false;
+        let playerXName = 'Player X';
+        let playerOName = 'Player O';
+        let difficulty = 'easy';
+        let xWins = 0;
+        let oWins = 0;
+        let ties = 0;
+
+        function checkWinner() {
+            const winningCombos = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            return winningCombos.find(combo => {
+                const [a, b, c] = combo;
+                return gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c];
+            });
+        }
+
+        function updateGameStatus(winner) {
+            if (winner === 'X') {
+                status.textContent = `${playerXName} wins!`;
+                xWins++;
+            } else if (winner === 'O') {
+                status.textContent = `${playerOName} wins!`;
+                oWins++;
+            } else {
+                status.textContent = 'It\'s a tie!';
+                ties++;
+            }
+            updateStats();
+            gameActive = false;
+        }
+
+        function updateStats() {
+            document.getElementById('wins').textContent = `X Wins: ${xWins}`;
+            document.getElementById('ties').textContent = `Ties: ${ties}`;
+            document.getElementById('losses').textContent = `O Wins: ${oWins}`;
+        }
+
+        function getRandomMove() {
+            const emptyIndices = gameBoard.map((cell, index) => cell === '' ? index : null).filter(index => index !== null);
+            return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        }
+
+        function findBestMove(player) {
+            for (let i = 0; i < 9; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = player;
+                    if (checkWinner()) {
+                        gameBoard[i] = '';
+                        return i;
+                    }
+                    gameBoard[i] = '';
+                }
+            }
+            return null;
+        }
+
+        function aiMove() {
+            let move;
+            if (difficulty === 'medium') {
+                move = findBestMove('O');
+                if (move === null) {
+                    move = findBestMove('X');
+                }
+            }
+            if (move === null) {
+                move = getRandomMove();
+            }
+            gameBoard[move] = 'O';
+            cells[move].textContent = 'O';
+            if (checkWinner()) {
+                updateGameStatus('O');
+            } else if (gameBoard.every(cell => cell)) {
+                updateGameStatus('tie');
+            } else {
+                currentPlayer = 'X';
+                status.textContent = `${playerXName}'s turn`;
+            }
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = cell.dataset.index;
+
+            if (gameBoard[index] || !gameActive || currentPlayer === 'O') return;
+
+            gameBoard[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+
+            if (checkWinner()) {
+                updateGameStatus(currentPlayer);
+            } else if (gameBoard.every(cell => cell)) {
+                updateGameStatus('tie');
+            } else {
+                currentPlayer = 'O';
+                status.textContent = `${playerOName}'s turn`;
+                if (gameActive) aiMove();
+            }
+        }
+
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            status.textContent = `Player ${currentPlayer}'s turn`;
+            cells.forEach(cell => cell.textContent = '');
+        }
+
+        startGameButton.addEventListener('click', () => {
+            playerXName = playerXInput.value || 'Player X';
+            playerOName = playerOInput.value || 'Player O';
+            difficulty = difficultySelect.value;
+            document.querySelector('.player-names').style.display = 'none';
+            gameActive = true;
+            status.textContent = `${playerXName}'s turn`;
+        });
+
+        resetButton.addEventListener('click', resetGame);
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    </script>
+</body>
+</html>
